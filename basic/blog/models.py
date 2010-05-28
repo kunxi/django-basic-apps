@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.db.models import permalink
 from django.contrib.auth.models import User
 from django.conf import settings
+from markitup.fields import MarkupField
 
 from basic.blog.managers import PublicManager
 
@@ -39,8 +40,8 @@ class Post(models.Model):
     title = models.CharField(_('title'), max_length=200)
     slug = models.SlugField(_('slug'), unique_for_date='publish')
     author = models.ForeignKey(User, blank=True, null=True)
-    body = models.TextField(_('body'), )
-    tease = models.TextField(_('tease'), blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
+    body = MarkupField(_('body'), )
+    tease = MarkupField(_('tease'), blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=2)
     allow_comments = models.BooleanField(_('allow comments'), default=True)
     publish = models.DateTimeField(_('publish'), default=datetime.datetime.now)

@@ -38,6 +38,10 @@ urlpatterns = patterns('basic.blog.views',
         view='post_list',
         name='blog_index_paginated'
     ),
+    url(r'^add/$',
+        view='post_create',
+        name='blog_post_create'
+    ),
     url(r'^$',
         view='post_list',
         name='blog_index'
