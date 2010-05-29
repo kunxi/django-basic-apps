@@ -36,6 +36,7 @@ class Post(models.Model):
     STATUS_CHOICES = (
         (1, _('Draft')),
         (2, _('Public')),
+        (2, _('Private')),
     )
     title = models.CharField(_('title'), max_length=200)
     slug = models.SlugField(_('slug'), unique_for_date='publish')
