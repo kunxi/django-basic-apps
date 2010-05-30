@@ -1,16 +1,13 @@
+import datetime, markdown
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import permalink
 from django.contrib.auth.models import User
 from django.conf import settings
-from markitup.fields import MarkupField
+from tagging.fields import TagField
+from markupfield.fields import MarkupField
 
 from basic.blog.managers import PublicManager
-
-import datetime
-import tagging
-from tagging.fields import TagField
-
 
 class Category(models.Model):
     """Category model."""
@@ -38,11 +35,12 @@ class Post(models.Model):
         (2, _('Public')),
         (2, _('Private')),
     )
+
     title = models.CharField(_('title'), max_length=200)
     slug = models.SlugField(_('slug'), unique_for_date='publish')
     author = models.ForeignKey(User, blank=True, null=True)
-    body = MarkupField(_('body'), )
-    tease = MarkupField(_('tease'), blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
+    body = MarkupField(_('body'), default_markup_type='markdown')
+    tease = MarkupField(_('tease'), default_markup_type='markdown', blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=2)
     allow_comments = models.BooleanField(_('allow comments'), default=True)
     publish = models.DateTimeField(_('publish'), default=datetime.datetime.now)
@@ -94,3 +92,22 @@ class BlogRoll(models.Model):
 
     def get_absolute_url(self):
         return self.url
+
+# Test cases
+from django.test import Client
+import unittest, datetime
+
+class MarkupTestCase(unittest.TestCase):
+  def setUp(self):
+    self.client = Client()
+    self.post = Post(title='DJ Ango', slug='dj-ango', 
+        body='*fancy*', status=2, publish=datetime.datetime(2008,5,5,16,20))
+    self.post.save()
+
+  def tearDown(self):
+    self.post.delete()
+
+
+  def testMarkup(self):
+    self.assertEqual(self.post.body.rendered, '<p><em>fancy</em></p>');
+
