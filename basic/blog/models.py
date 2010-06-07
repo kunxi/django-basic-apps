@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from tagging.fields import TagField
 from markupfield.fields import MarkupField
+from markupfield import markup
 
+from markup import wordpress_renderer
 from basic.blog.managers import PublicManager
 
 class Category(models.Model):
@@ -27,6 +29,10 @@ class Category(models.Model):
     def get_absolute_url(self):
         return ('blog_category_detail', None, {'slug': self.slug})
 
+MARKUP_TYPES = [
+    ("wordpress", wordpress_renderer),
+]
+MARKUP_TYPES += markup.DEFAULT_MARKUP_TYPES
 
 class Post(models.Model):
     """Post model."""
@@ -39,8 +45,8 @@ class Post(models.Model):
     title = models.CharField(_('title'), max_length=200)
     slug = models.SlugField(_('slug'), unique_for_date='publish')
     author = models.ForeignKey(User, blank=True, null=True)
-    body = MarkupField(_('body'), default_markup_type='markdown')
-    tease = MarkupField(_('tease'), default_markup_type='markdown', blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
+    body = MarkupField(_('body'), markup_choices=MARKUP_TYPES, default_markup_type='markdown')
+    tease = MarkupField(_('tease'), markup_choices=MARKUP_TYPES, default_markup_type='markdown', blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
     status = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=2)
     allow_comments = models.BooleanField(_('allow comments'), default=True)
     publish = models.DateTimeField(_('publish'), default=datetime.datetime.now)
@@ -93,21 +99,24 @@ class BlogRoll(models.Model):
     def get_absolute_url(self):
         return self.url
 
-# Test cases
-from django.test import Client
-import unittest, datetime
+import unittest
+class TestWordPressMarkup(unittest.TestCase):
+    def setUp(self):
+        self.spams = []
 
-class MarkupTestCase(unittest.TestCase):
-  def setUp(self):
-    self.client = Client()
-    self.post = Post(title='DJ Ango', slug='dj-ango', 
-        body='*fancy*', status=2, publish=datetime.datetime(2008,5,5,16,20))
-    self.post.save()
+    def tearDown(self):
+        for x in self.spams:
+            x.delete()
 
-  def tearDown(self):
-    self.post.delete()
+    def testLinebreak(self):
+        post = Post(title='linebreak', body='linebreak\n', body_markup_type='wordpress')
+        post.save()
+        self.spams.append(post)
+        self.assertEqual(post.body.rendered, '<p>linebreak<br /></p>')
 
-
-  def testMarkup(self):
-    self.assertEqual(self.post.body.rendered, '<p><em>fancy</em></p>');
+    def testPygments(self):
+        post = Post(title='javascript rendeirng', body='<code class="javascript">var x = new Date(); alert(x)</code>', body_markup_type='wordpress')
+        post.save()
+        self.spams.append(post)
+        self.assertEqual(post.body.rendered, '<p><div class="highlight"><pre><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">();</span> <span class="nx">alert</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span><br /></pre></div><br /></p>') 
 
