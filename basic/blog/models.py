@@ -70,8 +70,8 @@ class Post(models.Model):
     def get_absolute_url(self):
         return ('blog_detail', None, {
             'year': self.publish.year,
-            'month': self.publish.strftime('%b').lower(),
-            'day': self.publish.day,
+            'month': self.publish.strftime('%m'),
+            'day': self.publish.strftime('%d'),
             'slug': self.slug
         })
 

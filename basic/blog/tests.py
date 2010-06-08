@@ -57,7 +57,7 @@
 >>> response.context[0]['message']
 'Search term was too vague. Please try again.'
 
->>> response = client.get(reverse('blog_detail', args=[2008, 'apr', 2, 'where']))
+>>> response = client.get(reverse('blog_detail', args=['2008', '04', '02', 'where']))
 >>> response.context[0]['object']
 <Post: Where my grails at?>
 >>> response.status_code
