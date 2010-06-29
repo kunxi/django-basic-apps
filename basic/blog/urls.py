@@ -6,11 +6,11 @@ urlpatterns = patterns('basic.blog.views',
         view='post_detail',
         name='blog_detail'
     ),
-    url(r'^(?P<year>\d{4})/(?P<month>\w{3})/(?P<day>\d{1,2})/$',
+    url(r'^(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$',
         view='post_archive_day',
         name='blog_archive_day'
     ),
-    url(r'^(?P<year>\d{4})/(?P<month>\w{3})/$',
+    url(r'^(?P<year>\d{4})/(?P<month>\d{2})/$',
         view='post_archive_month',
         name='blog_archive_month'
     ),
@@ -34,6 +34,7 @@ urlpatterns = patterns('basic.blog.views',
         view='search',
         name='blog_search'
     ),
+
     url(r'^page/(?P<page>\w)/$',
         view='post_list',
         name='blog_index_paginated'
