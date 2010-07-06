@@ -39,7 +39,7 @@ class Post(models.Model):
     STATUS_CHOICES = (
         (1, _('Draft')),
         (2, _('Public')),
-        (2, _('Private')),
+        (3, _('Private')),
     )
 
     title = models.CharField(_('title'), max_length=200)
